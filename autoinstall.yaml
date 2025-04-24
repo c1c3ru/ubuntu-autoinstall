@@ -11,7 +11,7 @@ autoinstall:
   network:
     version: 2
     ethernets:
-      default:  # Fixed network configuration key
+      default:
         match:
           name: en*
         dhcp4: true
@@ -117,17 +117,17 @@ autoinstall:
           http://www.sis4.com/brModelo/brModelo.jar
         wget -q --show-progress -O /opt/brModelo/brModelo.png \
           https://raw.githubusercontent.com/chcandido/brModelo/master/src/imagens/logico.png
-        cat > /tmp/brmodelo.desktop <<EOF
-[Desktop Entry]
-Version=3.2
-Name=brModelo
-Exec=java -jar /opt/brModelo/brModelo.jar
-Icon=/opt/brModelo/brModelo.png
-Type=Application
-Categories=Development;Education;
-Path=/opt/brModelo
-Terminal=false
-EOF
+        cat > /tmp/brmodelo.desktop <<'EOF'
+        [Desktop Entry]
+        Version=3.2
+        Name=brModelo
+        Exec=java -jar /opt/brModelo/brModelo.jar
+        Icon=/opt/brModelo/brModelo.png
+        Type=Application
+        Categories=Development;Education;
+        Path=/opt/brModelo
+        Terminal=false
+        EOF
         mv /tmp/brmodelo.desktop /usr/share/applications/
         chmod +r /usr/share/applications/brmodelo.desktop
 
