@@ -2,26 +2,26 @@
 autoinstall:
   version: 1
   interactive-sections: []
-
+  
   # System Configuration
   locale: pt_BR.UTF-8
   keyboard:
     layout: br
     variant: abnt2
-
   network:
     version: 2
     ethernets:
-      enp0s3:
+      default:  # Fixed network configuration key
+        match:
+          name: en*
         dhcp4: true
         dhcp6: true
-
   storage:
     layout:
       name: direct
     swap:
       size: 0
-
+      
   # User Configuration
   identity:
     hostname: PC-MODELO-BL03
