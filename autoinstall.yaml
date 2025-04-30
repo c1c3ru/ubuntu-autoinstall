@@ -32,6 +32,11 @@ autoinstall:
     - sudo systemctl disable --now apt-daily.timer apt-daily.service apt-daily-upgrade.timer apt-daily-upgrade.service || true
     - sudo timedatectl set-timezone America/Fortaleza
     - sudo apt-get remove -y firefox || true
+    - |
+      # Add VirtualBox repository
+      wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo gpg --dearmor --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg
+      echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
+      sudo apt update
 
   # Package Installation
   packages:
@@ -57,7 +62,6 @@ autoinstall:
     - gtkwave
     - traceroute
     - wireshark
-    - mysql-workbench-community
     - snapd
     - postgresql
     - pgadmin4-desktop
@@ -94,6 +98,11 @@ autoinstall:
         # Regional configuration
         sudo update-locale LANG=pt_BR.UTF-8 LANGUAGE=pt_BR:pt:en
         sudo localectl set-locale LANG=pt_BR.UTF-8
+
+        # Install MySQL Workbench
+        wget https://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-workbench-community_8.0.36-1ubuntu22.04_amd64.deb
+        sudo apt install -y ./mysql-workbench-community_8.0.36-1ubuntu22.04_amd64.deb || sudo apt --fix-broken install
+        rm mysql-workbench-community_8.0.36-1ubuntu22.04_amd64.deb
 
         # VirtualBox Extension Pack
         wget -q --show-progress -O /tmp/Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack \
