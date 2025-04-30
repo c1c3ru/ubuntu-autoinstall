@@ -36,6 +36,11 @@ autoinstall:
       # Add VirtualBox repository
       wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo gpg --dearmor --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg
       echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
+      
+      # Add pgAdmin4 repository
+      curl -fsSL https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo gpg --dearmor -o /usr/share/keyrings/pgadmin-keyring.gpg
+      echo "deb [signed-by=/usr/share/keyrings/pgadmin-keyring.gpg] https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" | sudo tee /etc/apt/sources.list.d/pgadmin4.list
+      
       sudo apt update
 
   # Package Installation
@@ -64,13 +69,12 @@ autoinstall:
     - wireshark
     - snapd
     - postgresql
-    - pgadmin4-desktop
     - virtualbox-7.0
     - language-pack-pt
     - language-pack-gnome-pt
     - hunspell-pt-br
 
-  # Snap Packages
+  # Snap Packages (pgadmin4 moved here)
   snaps:
     - name: code
       channel: stable
@@ -82,6 +86,9 @@ autoinstall:
       channel: stable
       classic: true
     - name: android-studio
+      channel: stable
+      classic: true
+    - name: pgadmin4
       channel: stable
       classic: true
 
@@ -100,13 +107,14 @@ autoinstall:
         sudo localectl set-locale LANG=pt_BR.UTF-8
 
         # Install MySQL Workbench
-        wget https://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-workbench-community_8.0.36-1ubuntu22.04_amd64.deb
+        wget -q --show-progress https://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-workbench-community_8.0.36-1ubuntu22.04_amd64.deb
         sudo apt install -y ./mysql-workbench-community_8.0.36-1ubuntu22.04_amd64.deb || sudo apt --fix-broken install
         rm mysql-workbench-community_8.0.36-1ubuntu22.04_amd64.deb
 
         # VirtualBox Extension Pack
+        VBOX_VERSION=$(VBoxManage --version | cut -d'r' -f1)
         wget -q --show-progress -O /tmp/Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack \
-          https://download.virtualbox.org/virtualbox/7.0.12/Oracle_VM_VirtualBox_Extension_Pack-7.0.12.vbox-extpack
+          "https://download.virtualbox.org/virtualbox/${VBOX_VERSION}/Oracle_VM_VirtualBox_Extension_Pack-${VBOX_VERSION}.vbox-extpack"
         echo "y" | sudo VBoxManage extpack install /tmp/Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack --replace
         rm -f /tmp/Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack
 
@@ -172,11 +180,26 @@ autoinstall:
         rm -f /tmp/logisim.deb
 
         # Additional Tools
-        sudo apt-get install -y ghdl gtkwave
+        sudo apt-get install -y ghdl
         flutter config --enable-linux-desktop
         flutter doctor --android-licenses
         sudo dpkg-reconfigure keyboard-configuration -f noninteractive
         sudo setupcon -k --force
+
+        # Create pgAdmin4 desktop shortcut
+        cat > /tmp/pgadmin4.desktop <<'EOF'
+        [Desktop Entry]
+        Version=1.0
+        Name=pgAdmin 4
+        Comment=PostgreSQL Tools
+        Exec=/snap/bin/pgadmin4
+        Icon=/snap/pgadmin4/current/usr/share/pgadmin4/web/img/logo.png
+        Terminal=false
+        Type=Application
+        Categories=Development;Database;
+        EOF
+        sudo mv /tmp/pgadmin4.desktop /usr/share/applications/
+        sudo chmod +r /usr/share/applications/pgadmin4.desktop
 
         # Cleanup
         sudo apt-get autoremove -y
