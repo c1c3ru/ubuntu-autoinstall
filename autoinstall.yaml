@@ -6,8 +6,7 @@ autoinstall:
   # System Configuration
   locale: pt_BR.UTF-8
   keyboard:
-    layout: br
-    variant: abnt  # Changed from abnt2 to abnt
+    layout: us  # Using basic US layout during installation
   network:
     version: 2
     ethernets:
@@ -21,13 +20,14 @@ autoinstall:
       name: direct
     swap:
       size: 0
-
-  # Rest of your configuration remains exactly the same...
+      
+  # User Configuration
   identity:
     hostname: PC-MODELO-BL03
     username: informatica
     password: "$y$j9T$65N2vzS81bOBy6righB.a1$mI9E9hcsdUvKetb8DRgR9Z5joxRE7O8TU9.qe/czdgB"
-  
+
+  # System Preparation
   early-commands:
     - sudo systemctl stop unattended-upgrades || true
     - sudo systemctl disable --now apt-daily.timer apt-daily.service apt-daily-upgrade.timer apt-daily-upgrade.service || true
@@ -87,7 +87,12 @@ autoinstall:
     disable_root: false
     runcmd:
       - |
-        # Configuração regional
+        # Configure Brazilian ABNT2 keyboard
+        sudo sed -i 's/XKBLAYOUT=.*/XKBLAYOUT="br"/' /etc/default/keyboard
+        sudo sed -i 's/XKBVARIANT=.*/XKBVARIANT="abnt2"/' /etc/default/keyboard
+        sudo setupcon -k --force
+        
+        # Regional configuration
         sudo update-locale LANG=pt_BR.UTF-8 LANGUAGE=pt_BR:pt:en
         sudo localectl set-locale LANG=pt_BR.UTF-8
 
