@@ -28,12 +28,12 @@ autoinstall:
     username: informatica
     password: "$y$j9T$65N2vzS81bOBy6righB.a1$mI9E9hcsdUvKetb8DRgR9Z5joxRE7O8TU9.qe/czdgB"
 
-  # System Preparation
+  # Fixed System Preparation
   early-commands:
-    - systemctl stop unattended-upgrades
-    - systemctl disable --now apt-daily{,-upgrade}.{timer,service}
-    - timedatectl set-timezone America/Fortaleza
-    - apt-get remove -y firefox
+    - sudo systemctl stop unattended-upgrades || true
+    - sudo systemctl disable --now apt-daily.timer apt-daily.service apt-daily-upgrade.timer apt-daily-upgrade.service || true
+    - sudo timedatectl set-timezone America/Fortaleza
+    - sudo apt-get remove -y firefox || true
 
   # Package Installation
   packages:
@@ -89,33 +89,33 @@ autoinstall:
     runcmd:
       - |
         # Configuração regional
-        update-locale LANG=pt_BR.UTF-8 LANGUAGE=pt_BR:pt:en
-        localectl set-locale LANG=pt_BR.UTF-8
+        sudo update-locale LANG=pt_BR.UTF-8 LANGUAGE=pt_BR:pt:en
+        sudo localectl set-locale LANG=pt_BR.UTF-8
 
         # VirtualBox Extension Pack
         wget -q --show-progress -O /tmp/Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack \
           https://download.virtualbox.org/virtualbox/7.0.12/Oracle_VM_VirtualBox_Extension_Pack-7.0.12.vbox-extpack
-        echo "y" | VBoxManage extpack install /tmp/Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack --replace
+        echo "y" | sudo VBoxManage extpack install /tmp/Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack --replace
         rm -f /tmp/Oracle_VM_VirtualBox_Extension_Pack.vbox-extpack
 
         # XAMPP Installation
         wget -q --show-progress -O /tmp/xampp-installer.run \
           https://sourceforge.net/projects/xampp/files/XAMPP%20Linux/8.2.12/xampp-linux-x64-8.2.12-0-installer.run/download
         chmod +x /tmp/xampp-installer.run
-        /tmp/xampp-installer.run --mode unattended
-        /opt/lampp/lampp start
+        sudo /tmp/xampp-installer.run --mode unattended
+        sudo /opt/lampp/lampp start
         rm -f /tmp/xampp-installer.run
 
         # PostgreSQL Configuration
-        -u postgres psql -c "CREATE USER informatica WITH PASSWORD 'ifce';"
-        -u postgres psql -c "ALTER USER postgres PASSWORD 'ifce';"
-        -u postgres psql -c "CREATE DATABASE informaticadb WITH OWNER informatica;"
+        sudo -u postgres psql -c "CREATE USER informatica WITH PASSWORD 'ifce';"
+        sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'ifce';"
+        sudo -u postgres psql -c "CREATE DATABASE informaticadb WITH OWNER informatica;"
 
         # brModelo Installation
-        mkdir -p /opt/brModelo
-        wget -q --show-progress -O /opt/brModelo/brModelo.jar \
+        sudo mkdir -p /opt/brModelo
+        sudo wget -q --show-progress -O /opt/brModelo/brModelo.jar \
           http://www.sis4.com/brModelo/brModelo.jar
-        wget -q --show-progress -O /opt/brModelo/brModelo.png \
+        sudo wget -q --show-progress -O /opt/brModelo/brModelo.png \
           https://raw.githubusercontent.com/chcandido/brModelo/master/src/imagens/logico.png
         cat > /tmp/brmodelo.desktop <<'EOF'
         [Desktop Entry]
@@ -128,8 +128,8 @@ autoinstall:
         Path=/opt/brModelo
         Terminal=false
         EOF
-        mv /tmp/brmodelo.desktop /usr/share/applications/
-        chmod +r /usr/share/applications/brmodelo.desktop
+        sudo mv /tmp/brmodelo.desktop /usr/share/applications/
+        sudo chmod +r /usr/share/applications/brmodelo.desktop
 
         # VS Code Extensions
         for ext in \
@@ -150,31 +150,31 @@ autoinstall:
         # Google Chrome
         wget -q --show-progress -O /tmp/google-chrome.deb \
           https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        dpkg -i /tmp/google-chrome.deb || apt-get install -f -y
+        sudo dpkg -i /tmp/google-chrome.deb || sudo apt-get install -f -y
         rm -f /tmp/google-chrome.deb
 
         # Logisim Evolution
         wget -q --show-progress -O /tmp/logisim.deb \
           https://github.com/logisim-evolution/logisim-evolution/releases/download/v3.9.0/logisim-evolution_3.9.0_amd64.ubuntu22.04.deb
-        dpkg -i /tmp/logisim.deb || apt-get install -f -y
+        sudo dpkg -i /tmp/logisim.deb || sudo apt-get install -f -y
         rm -f /tmp/logisim.deb
 
         # Additional Tools
-        apt-get install -y ghdl gtkwave
+        sudo apt-get install -y ghdl gtkwave
         flutter config --enable-linux-desktop
         flutter doctor --android-licenses
-        dpkg-reconfigure keyboard-configuration -f noninteractive
-        setupcon -k --force
+        sudo dpkg-reconfigure keyboard-configuration -f noninteractive
+        sudo setupcon -k --force
 
         # Cleanup
-        apt-get autoremove -y
-        apt-get clean
-        rm -rf /tmp/*
+        sudo apt-get autoremove -y
+        sudo apt-get clean
+        sudo rm -rf /tmp/*
 
   # Finalization
   late-commands:
-    - systemctl enable postgresql
-    - systemctl start postgresql
-    - updatedb
+    - sudo systemctl enable postgresql
+    - sudo systemctl start postgresql
+    - sudo updatedb
     - echo "Instalação concluída com sucesso!"
-    - systemctl reboot
+    - sudo systemctl reboot
